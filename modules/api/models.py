@@ -34,6 +34,7 @@ class ModelDef(BaseModel):
     field_exclude: bool = False
 
 
+# NOTE: 基于Pydantic进行自定义
 class PydanticModelGenerator:
     """
     Takes in created classes and stubs them out in a way FastAPI/Pydantic is happy about:

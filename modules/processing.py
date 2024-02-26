@@ -112,6 +112,7 @@ def txt2img_image_conditioning(sd_model, x, width, height):
         return x.new_zeros(x.shape[0], 5, 1, 1, dtype=x.dtype, device=x.device)
 
 
+# PERF: api传入的参数定义在这里
 @dataclass(repr=False)
 class StableDiffusionProcessing:
     sd_model: object = None
@@ -127,7 +128,7 @@ class StableDiffusionProcessing:
     seed_resize_from_h: int = -1
     seed_resize_from_w: int = -1
     seed_enable_extras: bool = True
-    sampler_name: str = None
+    sampler_name: str = None # 这个应该才是定义的采样器
     batch_size: int = 1
     n_iter: int = 1
     steps: int = 50
@@ -716,16 +717,20 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     try:
         # if no checkpoint override or the override checkpoint can't be found, remove override entry and load opts checkpoint
         # and if after running refiner, the refiner model is not unloaded - webui swaps back to main model here, if model over is present it will be reloaded afterwards
+        # NOTE: 这里载入模型，通过override_settings字段传入
         if sd_models.checkpoint_aliases.get(p.override_settings.get('sd_model_checkpoint')) is None:
             p.override_settings.pop('sd_model_checkpoint', None)
+            # NOTE: 载入模型权重
             sd_models.reload_model_weights()
 
+        # NOTE: 其他模型参数的配置
         for k, v in p.override_settings.items():
             opts.set(k, v, is_api=True, run_callbacks=False)
 
             if k == 'sd_model_checkpoint':
                 sd_models.reload_model_weights()
 
+            # NOTE: 可以在override_settings中配置VAE的模型
             if k == 'sd_vae':
                 sd_vae.reload_vae_weights()
 
@@ -747,6 +752,7 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     return res
 
 
+# PERF: 真正执行推理的地方
 def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     """this is the main loop that both txt2img and img2img use; it calls func_init once inside all the scopes and func_sample once per batch"""
 
@@ -755,8 +761,10 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     else:
         assert p.prompt is not None
 
+    # NOTE: 执行之前先torch gc一下，尴尬
     devices.torch_gc()
 
+    # NOTE: 为什么有2个seed设置
     seed = get_fixed_seed(p.seed)
     subseed = get_fixed_seed(p.subseed)
 
@@ -773,6 +781,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
 
     p.sd_model_name = shared.sd_model.sd_checkpoint_info.name_for_extra
     p.sd_model_hash = shared.sd_model.sd_model_hash
+    # NOTE: 获取VAE模型的时候也同样需要名称和hash
     p.sd_vae_name = sd_vae.get_loaded_vae_name()
     p.sd_vae_hash = sd_vae.get_loaded_vae_hash()
 
@@ -800,6 +809,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     infotexts = []
     output_images = []
     with torch.no_grad(), p.sd_model.ema_scope():
+        # NOTE: autocast是自动混合算子，Pytorch的功能
         with devices.autocast():
             p.init(p.all_prompts, p.all_seeds, p.all_subseeds)
 
@@ -812,6 +822,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
         if state.job_count == -1:
             state.job_count = p.n_iter
 
+        # NOTE: n_iter设置需要生成多少次图片, 但是感觉不太对呀，毕竟每次都会增加
         for n in range(p.n_iter):
             p.iteration = n
 
@@ -823,6 +834,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
 
             sd_models.reload_model_weights()  # model can be changed for example by refiner
 
+            # NOTE: 依据生成的次数多次拷贝提示词
             p.prompts = p.all_prompts[n * p.batch_size:(n + 1) * p.batch_size]
             p.negative_prompts = p.all_negative_prompts[n * p.batch_size:(n + 1) * p.batch_size]
             p.seeds = p.all_seeds[n * p.batch_size:(n + 1) * p.batch_size]
@@ -872,6 +884,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
             else:
                 if opts.sd_vae_decode_method != 'Full':
                     p.extra_generation_params['VAE Decoder'] = opts.sd_vae_decode_method
+                # NOTE: 这一步完成了latent的到图像的过程
                 x_samples_ddim = decode_latent_batch(p.sd_model, samples_ddim, target_device=devices.cpu, check_for_nans=True)
 
             x_samples_ddim = torch.stack(x_samples_ddim).float()
@@ -1040,7 +1053,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     hr_uc: tuple | None = field(default=None, init=False)
     all_hr_prompts: list = field(default=None, init=False)
     all_hr_negative_prompts: list = field(default=None, init=False)
-    hr_prompts: list = field(default=None, init=False)
+    hr_prompts: list = field(default=None, init=False) # NOTE: 正向提示词在这里
     hr_negative_prompts: list = field(default=None, init=False)
     hr_extra_network_data: list = field(default=None, init=False)
 

@@ -18,6 +18,7 @@ def preload_extensions(extensions_dir, parser, extension_list=None):
 
     extensions = extension_list if extension_list is not None else os.listdir(extensions_dir)
     for dirname in sorted(extensions):
+        # NOTE: 加载插件的时候，以插件路径下的preload作为入口
         preload_script = os.path.join(extensions_dir, dirname, "preload.py")
         if not os.path.isfile(preload_script):
             continue

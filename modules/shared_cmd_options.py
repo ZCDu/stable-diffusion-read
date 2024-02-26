@@ -6,6 +6,7 @@ from modules.paths_internal import models_path, script_path, data_path, sd_confi
 
 parser = cmd_args.parser
 
+# NOTE: 读取extension文件夹下的目录，从而去加载各个插件
 script_loading.preload_extensions(extensions_dir, parser, extension_list=launch.list_extensions(launch.args.ui_settings_file))
 script_loading.preload_extensions(extensions_builtin_dir, parser)
 
