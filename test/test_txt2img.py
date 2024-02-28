@@ -27,7 +27,7 @@ def simple_txt2img_request():
         "s_noise": 1,
         "s_tmax": 0,
         "s_tmin": 0,
-        "sampler_index": "Euler a",
+        "sampler_index": "Euler a",  # NOTE: 采样器使用sampler_index进行设置
         "seed": -1,
         "seed_resize_from_h": -1,
         "seed_resize_from_w": -1,

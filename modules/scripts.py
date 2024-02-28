@@ -96,6 +96,7 @@ class Script:
 
         return True
 
+    # NOTE: 由于插件都有一个Script继承这个类，所以都是有run这个函数的
     def run(self, p, *args):
         """
         This function is called if the script has been selected in the script dropdown.
@@ -510,6 +511,7 @@ class ScriptRunner:
         self.on_after_component_elem_id = {}
         """dict of callbacks to be called after an element is created; key=elem_id, value=list of callbacks"""
 
+    # NOTE: txt2img : False
     def initialize_scripts(self, is_img2img):
         from modules import scripts_auto_postprocessing
 
@@ -524,6 +526,7 @@ class ScriptRunner:
             script.filename = script_data.path
             script.is_txt2img = not is_img2img
             script.is_img2img = is_img2img
+            # NOTE: tabname应该是用于区分文生图和图生图任务的
             script.tabname = "img2img" if is_img2img else "txt2img"
 
             visibility = script.show(script.is_img2img)
@@ -644,6 +647,7 @@ class ScriptRunner:
 
         self.setup_ui_for_section(None, self.selectable_scripts)
 
+        # NOTE: 这儿应该就是加载extensions插件UI的地方
         def select_script(script_index):
             selected_script = self.selectable_scripts[script_index - 1] if script_index>0 else None
 

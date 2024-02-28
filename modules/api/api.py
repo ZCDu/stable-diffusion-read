@@ -322,6 +322,7 @@ class Api:
             script_args[0] = selectable_idx + 1
 
         # Now check for always on scripts
+        # NOTE: 获取extensions插件的脚本
         if request.alwayson_scripts:
             for alwayson_script_name in request.alwayson_scripts.keys():
                 alwayson_script = self.get_script(alwayson_script_name, script_runner)
@@ -341,6 +342,7 @@ class Api:
     def text2imgapi(self, txt2imgreq: models.StableDiffusionTxt2ImgProcessingAPI):
         script_runner = scripts.scripts_txt2img
         if not script_runner.scripts:
+            # NOTE: 这里只涉及参数的更新
             script_runner.initialize_scripts(False)
             ui.create_ui()
         if not self.default_script_arg_txt2img:
@@ -358,8 +360,9 @@ class Api:
         args = vars(populate)
         args.pop('script_name', None)
         args.pop('script_args', None) # will refeed them to the pipeline directly after initializing them
-        args.pop('alwayson_scripts', None)
+        args.pop('alwayson_scripts', None) #NOTE: 这里丢弃了插件的配置是因为需要分离插件的参数和SD的参数
 
+        # NOTE: 这里实现了插件的加载
         script_args = self.init_script_args(txt2imgreq, self.default_script_arg_txt2img, selectable_scripts, selectable_script_idx, script_runner)
 
         send_images = args.pop('send_images', True)
@@ -375,19 +378,24 @@ class Api:
                 p.outpath_samples = opts.outdir_txt2img_samples
 
                 try:
+                    # NOTE: 设置任务，然后调用指定的函数进行图像的生成
                     shared.state.begin(job="scripts_txt2img")
+                    # HACK: 从这儿看，有selectable_scripts的时候走的是其对应的执行流程，而没有的时候走的是process_images的流程
+                    # 而后者就是我们在执行最基础生成功能时候走的流程
                     if selectable_scripts is not None:
                         p.script_args = script_args
                         processed = scripts.scripts_txt2img.run(p, *p.script_args) # Need to pass args as list here
-                    else:
+                    else: # HACK: 在没有selectable_scripts的时候，直接调用指定的SD模型进行了图像生成
                         p.script_args = tuple(script_args) # Need to pass args as tuple here
                         processed = process_images(p)
                 finally:
                     shared.state.end()
                     shared.total_tqdm.clear()
 
+        # NOTE: processed存储的就是生图处理之后的结果
         b64images = list(map(encode_pil_to_base64, processed.images)) if send_images else []
 
+        # NOTE: 类型封装，所以生图的操作肯定在之前
         return models.TextToImageResponse(images=b64images, parameters=vars(txt2imgreq), info=processed.js())
 
     def img2imgapi(self, img2imgreq: models.StableDiffusionImg2ImgProcessingAPI):

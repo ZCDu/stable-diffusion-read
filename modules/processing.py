@@ -752,7 +752,7 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     return res
 
 
-# PERF: 真正执行推理的地方
+# PERF: 默认情况下，如果没有选择插件，真正执行推理的地方
 def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     """this is the main loop that both txt2img and img2img use; it calls func_init once inside all the scopes and func_sample once per batch"""
 
