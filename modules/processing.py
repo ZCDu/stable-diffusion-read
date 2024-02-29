@@ -112,14 +112,14 @@ def txt2img_image_conditioning(sd_model, x, width, height):
         return x.new_zeros(x.shape[0], 5, 1, 1, dtype=x.dtype, device=x.device)
 
 
-# PERF: api传入的参数定义在这里
+# PERF: api传入的参数，通用的参数定义
 @dataclass(repr=False)
 class StableDiffusionProcessing:
     sd_model: object = None
     outpath_samples: str = None
     outpath_grids: str = None
     prompt: str = ""
-    prompt_for_display: str = None
+    prompt_for_display: str = None 
     negative_prompt: str = ""
     styles: list[str] = None
     seed: int = -1
@@ -1023,6 +1023,8 @@ def old_hires_fix_first_pass_dimensions(width, height):
     return width, height
 
 
+# PERF: api传入的参数，针对txt2img的特定封装
+# 可以发现，针对txt2img的基本都是hight resolution的设置
 @dataclass(repr=False)
 class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     enable_hr: bool = False
@@ -1053,7 +1055,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     hr_uc: tuple | None = field(default=None, init=False)
     all_hr_prompts: list = field(default=None, init=False)
     all_hr_negative_prompts: list = field(default=None, init=False)
-    hr_prompts: list = field(default=None, init=False) # NOTE: 正向提示词在这里
+    hr_prompts: list = field(default=None, init=False) # NOTE: hr=high resolution
     hr_negative_prompts: list = field(default=None, init=False)
     hr_extra_network_data: list = field(default=None, init=False)
 
