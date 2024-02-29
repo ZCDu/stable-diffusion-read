@@ -55,6 +55,7 @@ def initialize():
     initialize_util.configure_opts_onchange()
 
     from modules import modelloader
+    # NOTE: 说实话，并不是很理解为什么要进行模型的位置迁移
     modelloader.cleanup_models()
 
     from modules import sd_models

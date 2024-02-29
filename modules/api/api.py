@@ -379,6 +379,7 @@ class Api:
 
                 try:
                     # NOTE: 设置任务，然后调用指定的函数进行图像的生成
+                    # 这里的shared.stat对应的应该是shared_state
                     shared.state.begin(job="scripts_txt2img")
                     # HACK: 从这儿看，有selectable_scripts的时候走的是其对应的执行流程，而没有的时候走的是process_images的流程
                     # 而后者就是我们在执行最基础生成功能时候走的流程

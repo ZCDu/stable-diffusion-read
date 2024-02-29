@@ -23,6 +23,7 @@ def create_api(app):
     return api
 
 
+# NOTE: API启动入口
 def api_only():
     from fastapi import FastAPI
     from modules.shared_cmd_options import cmd_opts

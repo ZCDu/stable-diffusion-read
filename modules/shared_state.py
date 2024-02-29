@@ -9,6 +9,7 @@ from typing import Optional
 log = logging.getLogger(__name__)
 
 
+# NOTE: state来自于
 class State:
     skipped = False
     interrupted = False
