@@ -28,6 +28,7 @@ def api_only():
     from fastapi import FastAPI
     from modules.shared_cmd_options import cmd_opts
 
+    # NOTE: 启动时候的各类参数初始化，这里最重要的是shared的初始化
     initialize.initialize()
 
     app = FastAPI()

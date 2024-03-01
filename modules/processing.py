@@ -717,7 +717,7 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     try:
         # if no checkpoint override or the override checkpoint can't be found, remove override entry and load opts checkpoint
         # and if after running refiner, the refiner model is not unloaded - webui swaps back to main model here, if model over is present it will be reloaded afterwards
-        # NOTE: 这里载入模型，通过override_settings字段传入
+        # NOTE: 当override_settings中没有sd_model_checkpoint的时候
         if sd_models.checkpoint_aliases.get(p.override_settings.get('sd_model_checkpoint')) is None:
             p.override_settings.pop('sd_model_checkpoint', None)
             # NOTE: 载入模型权重
@@ -727,6 +727,7 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
         for k, v in p.override_settings.items():
             opts.set(k, v, is_api=True, run_callbacks=False)
 
+            # HACK: 如果不设置sd_model_checkpoint和sd_vae是否默认调用的就是UI上的第一个
             if k == 'sd_model_checkpoint':
                 sd_models.reload_model_weights()
 
@@ -803,6 +804,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     if os.path.exists(cmd_opts.embeddings_dir) and not p.do_not_reload_embeddings:
         model_hijack.embedding_db.load_textual_inversion_embeddings()
 
+    # FIX: 啊？在这里会调用插件的process
     if p.scripts is not None:
         p.scripts.process(p)
 

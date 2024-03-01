@@ -16,6 +16,7 @@ def initialize():
 
     from modules import options, shared_options
     shared.options_templates = shared_options.options_templates
+    # NOTE: 对shared的opt进行了配置
     shared.opts = options.Options(shared_options.options_templates, shared_options.restricted_opts)
     shared.restricted_opts = shared_options.restricted_opts
     if os.path.exists(shared.config_filename):
@@ -32,6 +33,8 @@ def initialize():
     shared.weight_load_location = None if cmd_opts.lowram else "cpu"
 
     from modules import shared_state
+    # NOTE: 定义了shared的state，因此，txt2imageapi的时候，这个已经不是空的了
+    # 这个其实是用来保存当前执行任务状态用的
     shared.state = shared_state.State()
 
     from modules import styles
@@ -43,6 +46,7 @@ def initialize():
     from modules import shared_total_tqdm
     shared.total_tqdm = shared_total_tqdm.TotalTQDM()
 
+    # NOTE: 居然还有显卡的资源监控函数
     from modules import memmon, devices
     shared.mem_mon = memmon.MemUsageMonitor("MemMon", devices.device, shared.opts)
     shared.mem_mon.start()

@@ -31,6 +31,7 @@ def imports():
     startup_timer.record("import sgm")
 
     from modules import shared_init
+    # NOTE: 这里完成了shared初始化
     shared_init.initialize()
     startup_timer.record("initialize shared")
 
@@ -52,6 +53,7 @@ def initialize():
     initialize_util.fix_asyncio_event_loop_policy()
     initialize_util.validate_tls_options()
     initialize_util.configure_sigint_handler()
+    # NOTE: 对opts中与模型相关的一些操作，绑定了重载函数
     initialize_util.configure_opts_onchange()
 
     from modules import modelloader
