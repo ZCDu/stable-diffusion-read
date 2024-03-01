@@ -445,6 +445,7 @@ def load_scripts():
     postprocessing_scripts_data.clear()
     script_callbacks.clear_callbacks()
 
+    # NOTE: 这里载入了所有的scripts脚本
     scripts_list = list_scripts("scripts", ".py") + list_scripts("modules/processing_scripts", ".py", include_extensions=False)
 
     syspath = sys.path
@@ -531,6 +532,7 @@ class ScriptRunner:
 
             visibility = script.show(script.is_img2img)
 
+            # p.scripts的定义在这里
             if visibility == AlwaysVisible:
                 self.scripts.append(script)
                 self.alwayson_scripts.append(script)
@@ -695,6 +697,8 @@ class ScriptRunner:
         if script_index == 0:
             return None
 
+        # FIX: 取得是最后一个selectable_scripts呀，这是个啥呀，难道和那个script_name有关呀
+        # 等看到有script_name的时候，看看是不是加载了额外的插件包，如果有再看这个包里是否有script类，类里是否有run函数
         script = self.selectable_scripts[script_index-1]
 
         if script is None:

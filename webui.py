@@ -10,6 +10,7 @@ from modules import initialize
 startup_timer = timer.startup_timer
 startup_timer.record("launcher")
 
+# NOTE: 进行shared的初始化
 initialize.imports()
 
 initialize.check_versions()
@@ -28,7 +29,7 @@ def api_only():
     from fastapi import FastAPI
     from modules.shared_cmd_options import cmd_opts
 
-    # NOTE: 启动时候的各类参数初始化，这里最重要的是shared的初始化
+    # NOTE: 配置各类使用到的模型的位置，主要是opts的配置
     initialize.initialize()
 
     app = FastAPI()

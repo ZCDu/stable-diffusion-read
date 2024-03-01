@@ -217,6 +217,7 @@ def list_extensions():
                 continue
 
             is_builtin = dirname == extensions_builtin_dir
+            # NOTE: 对插件进行了设置，对于非内置的插件(非extensions_builtin_dir文件夹的，也就是常规extensions文件夹)，允许在发现更新时进行更新
             extension = Extension(name=extension_dirname, path=path, enabled=extension_dirname not in shared.opts.disabled_extensions, is_builtin=is_builtin, metadata=metadata)
             extensions.append(extension)
             loaded_extensions[canonical_name] = extension

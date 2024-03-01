@@ -266,6 +266,7 @@ class Api:
         raise HTTPException(status_code=401, detail="Incorrect username or password", headers={"WWW-Authenticate": "Basic"})
 
     def get_selectable_script(self, script_name, script_runner):
+        # NOTE: 平时我用的时候都是这里就直接返回了
         if script_name is None or script_name == "":
             return None, None
 
@@ -347,6 +348,7 @@ class Api:
             ui.create_ui()
         if not self.default_script_arg_txt2img:
             self.default_script_arg_txt2img = self.init_default_script_args(script_runner)
+        # FIX: 当前不知道这个script_name到底是对应的啥
         selectable_scripts, selectable_script_idx = self.get_selectable_script(txt2imgreq.script_name, script_runner)
 
         populate = txt2imgreq.copy(update={  # Override __init__ params
@@ -386,7 +388,7 @@ class Api:
                     if selectable_scripts is not None:
                         p.script_args = script_args
                         processed = scripts.scripts_txt2img.run(p, *p.script_args) # Need to pass args as list here
-                    else: # HACK: 在没有selectable_scripts的时候，直接调用指定的SD模型进行了图像生成
+                    else: # HACK: 在没有selectable_scripts的时候, 平时我们传都没有script_name，所以都是走的这条路
                         p.script_args = tuple(script_args) # Need to pass args as tuple here
                         processed = process_images(p)
                 finally:

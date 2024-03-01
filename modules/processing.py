@@ -769,6 +769,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     seed = get_fixed_seed(p.seed)
     subseed = get_fixed_seed(p.subseed)
 
+    # NOTE: 这儿是将人脸的模块复制到p里
     if p.restore_faces is None:
         p.restore_faces = opts.face_restoration
 
@@ -801,6 +802,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     else:
         p.all_subseeds = [int(subseed) + x for x in range(len(p.all_prompts))]
 
+    # NOTE: 再有textual_inversion的时候需要加载
     if os.path.exists(cmd_opts.embeddings_dir) and not p.do_not_reload_embeddings:
         model_hijack.embedding_db.load_textual_inversion_embeddings()
 

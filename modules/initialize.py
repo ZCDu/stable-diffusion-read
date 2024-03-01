@@ -31,7 +31,7 @@ def imports():
     startup_timer.record("import sgm")
 
     from modules import shared_init
-    # NOTE: 这里完成了shared初始化
+    # NOTE: 这里完成了shared初始化, 这里完成了opts的定义
     shared_init.initialize()
     startup_timer.record("initialize shared")
 
@@ -52,6 +52,7 @@ def initialize():
     initialize_util.fix_torch_version()
     initialize_util.fix_asyncio_event_loop_policy()
     initialize_util.validate_tls_options()
+    # NOTE: 居然贴心的设置了Ctrl-C快速推出的设置
     initialize_util.configure_sigint_handler()
     # NOTE: 对opts中与模型相关的一些操作，绑定了重载函数
     initialize_util.configure_opts_onchange()
@@ -68,10 +69,12 @@ def initialize():
 
     from modules import codeformer_model
     warnings.filterwarnings(action="ignore", category=UserWarning, module="torchvision.transforms.functional_tensor")
+    # NOTE: 在这里将codeformer加入到了shared中的face_restorers list中
     codeformer_model.setup_model(cmd_opts.codeformer_models_path)
     startup_timer.record("setup codeformer")
 
     from modules import gfpgan_model
+    # FaceRestorerGFPGAN 添加到发策_restores list中
     gfpgan_model.setup_model(cmd_opts.gfpgan_models_path)
     startup_timer.record("setup gfpgan")
 
@@ -89,6 +92,7 @@ def initialize_rest(*, reload_script_modules=False):
     startup_timer.record("set samplers")
 
     from modules import extensions
+    # NOTE: 定位所有的插件，包括extensions_builtin的插件
     extensions.list_extensions()
     startup_timer.record("list extensions")
 
@@ -110,9 +114,11 @@ def initialize_rest(*, reload_script_modules=False):
     localization.list_localizations(cmd_opts.localizations_dir)
     startup_timer.record("list localizations")
 
+    # NOTE: 没看懂这里在干什么，但是感觉是肯定会执行的
     with startup_timer.subcategory("load scripts"):
         scripts.load_scripts()
 
+    # NOTE: 刷新的时候会重新加载所有script的UI
     if reload_script_modules:
         for module in [module for name, module in sys.modules.items() if name.startswith("modules.ui")]:
             importlib.reload(module)
@@ -135,6 +141,7 @@ def initialize_rest(*, reload_script_modules=False):
     sd_hijack.list_optimizers()
     startup_timer.record("scripts list_optimizers")
 
+    # NOTE: 啊？还有Unet的文件夹呀
     from modules import sd_unet
     sd_unet.list_unets()
     startup_timer.record("scripts list_unets")
