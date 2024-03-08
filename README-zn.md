@@ -1,5 +1,6 @@
 # 文件介绍
 launch 启动入口 -> launch_utils.start -> webui.api_only->api/api
+# 调用txt2img ControlNet 
 
 
 # 重要参数
